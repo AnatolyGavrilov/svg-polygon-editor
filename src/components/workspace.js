@@ -56,6 +56,11 @@ template.innerHTML = `
       right: 0;
       bottom: 0;
       overflow: hidden;
+      cursor: grab;
+    }
+
+    .polygons-container.grabbing {
+      cursor: grabbing;
     }
 
     .drop-indicator {
@@ -75,7 +80,7 @@ template.innerHTML = `
   <div class="ruler-y">
     <ruler-y></ruler-y>
   </div>
-  <div class="polygons-container">
+  <div class="polygons-container" id="container">
     <div class="workspace-content" id="content"></div>
     <div class="drop-indicator" id="drop-indicator"></div>
   </div>
@@ -87,6 +92,7 @@ class WorkspaceArea extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.appendChild(template.content.cloneNode(true));
 
+    this.container = this.shadowRoot.getElementById("container");
     this.content = this.shadowRoot.getElementById("content");
     this.dropIndicator = this.shadowRoot.getElementById("drop-indicator");
     this.scale = 1;
@@ -107,8 +113,8 @@ class WorkspaceArea extends HTMLElement {
   }
 
   setupEventListeners() {
-    this.content.addEventListener("wheel", this.handleWheel.bind(this));
-    this.content.addEventListener("mousedown", this.handleMouseDown.bind(this));
+    this.container.addEventListener("wheel", this.handleWheel.bind(this));
+    this.container.addEventListener("mousedown", this.handleMouseDown.bind(this));
     document.addEventListener("mousemove", this.handleMouseMove.bind(this));
     document.addEventListener("mouseup", this.handleMouseUp.bind(this));
 
@@ -126,15 +132,15 @@ class WorkspaceArea extends HTMLElement {
   handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
-
+    
     // Update drop indicator position and size
     const size = 100 / this.scale;
-    const rect = this.content.getBoundingClientRect();
+    const rect = this.container.getBoundingClientRect();
     const x = (e.clientX - rect.left - this.translateX) / this.scale;
     const y = (e.clientY - rect.top - this.translateY) / this.scale;
-
-    this.dropIndicator.style.left = `${x - size / 2}px`;
-    this.dropIndicator.style.top = `${y - size / 2}px`;
+    
+    this.dropIndicator.style.left = `${x - size/2}px`;
+    this.dropIndicator.style.top = `${y - size/2}px`;
     this.dropIndicator.style.width = `${size}px`;
     this.dropIndicator.style.height = `${size}px`;
   }
@@ -150,8 +156,8 @@ class WorkspaceArea extends HTMLElement {
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     const newScale = Math.min(Math.max(0.1, this.scale + delta), 3);
 
-    const mouseX = e.clientX - this.content.getBoundingClientRect().left;
-    const mouseY = e.clientY - this.content.getBoundingClientRect().top;
+    const mouseX = e.clientX - this.container.getBoundingClientRect().left;
+    const mouseY = e.clientY - this.container.getBoundingClientRect().top;
 
     this.translateX -= (mouseX - this.translateX) * (newScale / this.scale - 1);
     this.translateY -= (mouseY - this.translateY) * (newScale / this.scale - 1);
@@ -166,7 +172,8 @@ class WorkspaceArea extends HTMLElement {
       this.isDragging = true;
       this.startX = e.clientX - this.translateX;
       this.startY = e.clientY - this.translateY;
-      this.content.style.cursor = "grabbing";
+      this.container.classList.add("grabbing");
+      e.preventDefault();
     }
   }
 
@@ -181,7 +188,7 @@ class WorkspaceArea extends HTMLElement {
 
   handleMouseUp() {
     this.isDragging = false;
-    this.content.style.cursor = "grab";
+    this.container.classList.remove("grabbing");
   }
 
   handleDrop(e) {
@@ -193,7 +200,7 @@ class WorkspaceArea extends HTMLElement {
       try {
         const polygonData = JSON.parse(data);
 
-        const rect = this.content.getBoundingClientRect();
+        const rect = this.container.getBoundingClientRect();
         const x = (e.clientX - rect.left - this.translateX) / this.scale;
         const y = (e.clientY - rect.top - this.translateY) / this.scale;
 
