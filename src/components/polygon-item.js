@@ -65,7 +65,6 @@ class PolygonItem extends HTMLElement {
   }
 
   handleDragStart(e) {
-    // Set the drag image to the polygon itself
     const rect = this.getBoundingClientRect();
     e.dataTransfer.setDragImage(this, rect.width / 2, rect.height / 2);
 
