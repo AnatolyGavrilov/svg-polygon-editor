@@ -1,6 +1,7 @@
 import "./buffer-zone";
 import "./workspace";
-import "./ruler";
+import "./rulerX";
+import "./rulerY";
 import {
   saveToLocalStorage,
   loadFromLocalStorage,
@@ -32,7 +33,7 @@ template.innerHTML = `
     
     button {
       padding: 8px 16px;
-      background-color: #4CAF50;
+      background-color: #FF1493;
       color: white;
       border: none;
       border-radius: 4px;
@@ -40,15 +41,15 @@ template.innerHTML = `
     }
     
     button:hover {
-      background-color: #45a049;
+      background-color: #8B008B;
     }
     
     button.reset {
-      background-color: #f44336;
+      background-color: #8B008B;
     }
     
     button.reset:hover {
-      background-color: #d32f2f;
+      background-color: #8B008B;
     }
   </style>
   
