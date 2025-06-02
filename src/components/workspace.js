@@ -1,5 +1,6 @@
 import "./polygon-item";
-import "./ruler";
+import "./rulerX";
+import "./rulerY";
 
 const template = document.createElement("template");
 template.innerHTML = `
@@ -66,7 +67,7 @@ template.innerHTML = `
     .drop-indicator {
       position: absolute;
       pointer-events: none;
-      border: 2px dashed #4CAF50;
+      border: 2px dashed #8B008B;
       background-color: rgba(76, 175, 80, 0.1);
       z-index: 100;
       display: none;
@@ -114,7 +115,10 @@ class WorkspaceArea extends HTMLElement {
 
   setupEventListeners() {
     this.container.addEventListener("wheel", this.handleWheel.bind(this));
-    this.container.addEventListener("mousedown", this.handleMouseDown.bind(this));
+    this.container.addEventListener(
+      "mousedown",
+      this.handleMouseDown.bind(this)
+    );
     document.addEventListener("mousemove", this.handleMouseMove.bind(this));
     document.addEventListener("mouseup", this.handleMouseUp.bind(this));
 
@@ -132,15 +136,14 @@ class WorkspaceArea extends HTMLElement {
   handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
-    
-    // Update drop indicator position and size
+
     const size = 100 / this.scale;
     const rect = this.container.getBoundingClientRect();
     const x = (e.clientX - rect.left - this.translateX) / this.scale;
     const y = (e.clientY - rect.top - this.translateY) / this.scale;
-    
-    this.dropIndicator.style.left = `${x - size/2}px`;
-    this.dropIndicator.style.top = `${y - size/2}px`;
+
+    this.dropIndicator.style.left = `${x - size / 2}px`;
+    this.dropIndicator.style.top = `${y - size / 2}px`;
     this.dropIndicator.style.width = `${size}px`;
     this.dropIndicator.style.height = `${size}px`;
   }

@@ -21,7 +21,7 @@ template.innerHTML = `
   </style>
   
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <polygon fill="var(--polygon-color, #4CAF50)" stroke="#333" stroke-width="1"></polygon>
+    <polygon fill="var(--polygon-color, #8B008B)" stroke="#333" stroke-width="1"></polygon>
   </svg>
 `;
 
