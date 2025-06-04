@@ -72,6 +72,11 @@ template.innerHTML = `
       z-index: 100;
       display: none;
     }
+
+    polygon-item {
+      position: absolute;
+      cursor: move;
+    }
   </style>
   
   <h2>Workspace</h2>
@@ -102,6 +107,9 @@ class WorkspaceArea extends HTMLElement {
     this.isDragging = false;
     this.startX = 0;
     this.startY = 0;
+    this.draggedPolygon = null;
+    this.dragOffsetX = 0;
+    this.dragOffsetY = 0;
 
     this.rulerX = this.shadowRoot.querySelector("ruler-x");
     this.rulerY = this.shadowRoot.querySelector("ruler-y");
@@ -126,6 +134,21 @@ class WorkspaceArea extends HTMLElement {
     this.addEventListener("dragover", this.handleDragOver.bind(this));
     this.addEventListener("dragleave", this.handleDragLeave.bind(this));
     this.addEventListener("drop", this.handleDrop.bind(this));
+
+    this.content.addEventListener(
+      "mousedown",
+      this.handlePolygonMouseDown.bind(this)
+    );
+  }
+
+  handlePolygonMouseDown(e) {
+    if (e.button === 0 && e.target.tagName === "POLYGON-ITEM") {
+      this.draggedPolygon = e.target;
+      const rect = this.draggedPolygon.getBoundingClientRect();
+      this.dragOffsetX = e.clientX - rect.left;
+      this.dragOffsetY = e.clientY - rect.top;
+      e.preventDefault();
+    }
   }
 
   handleDragEnter(e) {
@@ -171,7 +194,7 @@ class WorkspaceArea extends HTMLElement {
   }
 
   handleMouseDown(e) {
-    if (e.button === 0 && e.ctrlKey === false) {
+    if (e.button === 0 && e.ctrlKey === false && !this.draggedPolygon) {
       this.isDragging = true;
       this.startX = e.clientX - this.translateX;
       this.startY = e.clientY - this.translateY;
@@ -186,12 +209,27 @@ class WorkspaceArea extends HTMLElement {
       this.translateY = e.clientY - this.startY;
       this.updateTransform();
       this.updateRulers();
+    } else if (this.draggedPolygon) {
+      const rect = this.container.getBoundingClientRect();
+      const x =
+        (e.clientX - rect.left - this.translateX - this.dragOffsetX) /
+        this.scale;
+      const y =
+        (e.clientY - rect.top - this.translateY - this.dragOffsetY) /
+        this.scale;
+
+      this.draggedPolygon.style.left = `${x}px`;
+      this.draggedPolygon.style.top = `${y}px`;
     }
   }
 
   handleMouseUp() {
-    this.isDragging = false;
-    this.container.classList.remove("grabbing");
+    if (this.isDragging) {
+      this.isDragging = false;
+      this.container.classList.remove("grabbing");
+    } else if (this.draggedPolygon) {
+      this.draggedPolygon = null;
+    }
   }
 
   handleDrop(e) {
